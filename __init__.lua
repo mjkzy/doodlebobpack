@@ -44,7 +44,7 @@ function entity:player_spawned()
     self:setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
     if self:ishost() then
         if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
-            self:_iprintlnbold("Player status ^:Host")
+            self:_iprintlnbold("your status is ^:host")
         elseif gamename() == "iw6x" and game:getteamscore("axis") == 3 and game:getteamscore("allies") == 3 then
             self.pers["kills"] = 25
             self.kills = 25
@@ -67,13 +67,13 @@ function entity:player_spawned()
                 game:executecommand("botz " .. cross.z)
                 game:executecommand("savemap " .. damap)
                 game:setdvar("savemap", game:getdvar("mapname"))
-                self:_iprintln("bot spawn ^:saved^7, will apply next rounf")
+                self:_iprintln("bot spawn ^:saved^7, will apply next round")
             elseif self:getstance() == "prone" then
                 if (game:getdvar("wtfx") ~= "no") then
                     game:setdvar("wtfx", "no")
                     game:setdvar("wtfy", "no")
                     game:setdvar("wtfz", "no")
-                    self:_iprintln("bot spawn ^:cleared^7, will apply next rounf")
+                    self:_iprintln("bot spawn ^:cleared^7, will apply next round")
                 end
             end
         end)
@@ -89,7 +89,6 @@ function entity:player_spawned()
         self:notifyonplayercommand("streakbind", "+actionslot 1")
         self:onnotify("streakbind", function()
             -- different usage for iw6/s1
-
             select_func(function()
                 self:givekillstreak("deployable_ammo", 6)
             end, function()
@@ -121,7 +120,7 @@ function entity:player_spawned()
                 self:setrank(select(59, 49), select(guest.iw6x_prestige, guest.s1x_prestige))
 
                 if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
-                    self:_iprintlnbold("Player status ^:Verified")
+                    self:_iprintlnbold("your status is ^:verified")
                 end
 
                 return
