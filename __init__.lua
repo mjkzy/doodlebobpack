@@ -69,7 +69,7 @@ function entity:player_spawned()
     self:_setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
 
     if self:ishost() then
-        if tonumber(game:getdvar("unsetup")) ~= 1 then
+        if not is_unsetup() then
             self:freezecontrols(false)
         end
 
@@ -102,9 +102,11 @@ function entity:player_spawned()
                 self:_iprintln("next bot spawn ^:saved^7, teleporting bot(s)..")
 
                 -- teleport all current bots to crosshair
-                for index, p in ipairs(players) do
-                    if p:_isbot() then
-                        p:setorigin(cross)
+                if not is_unsetup() then
+                    for index, p in ipairs(players) do
+                        if p:_isbot() then
+                            p:setorigin(cross)
+                        end
                     end
                 end
             elseif self:getstance() == "prone" then
@@ -170,7 +172,7 @@ function entity:player_spawned()
     -- code to run if the player is a bot
     if self:_isbot() then
         -- freeze bot if unsetup
-        if tonumber(game:getdvar("unsetup")) ~= 1 then
+        if not is_unsetup() then
             game:oninterval(function()
                 self:freezecontrols(true)
             end, 5)
@@ -185,8 +187,7 @@ function entity:player_spawned()
         self:setrank(select(59, 49, 55), host.bot_prestige)
 
         -- teleport bot to saved spawn if existing
-        if (tonumber(game:getdvar("unsetup")) ~= 1 and game:getdvar("savemap") == game:getdvar("mapname") and
-            game:getdvar("botz") ~= "no") then
+        if (not is_unsetup() and game:getdvar("savemap") == game:getdvar("mapname") and game:getdvar("botz") ~= "no") then
             local position = vector:new(tonumber(game:getdvar("botx")), tonumber(game:getdvar("boty")),
                 tonumber(game:getdvar("botz")))
             self:setorigin(position)
@@ -228,12 +229,14 @@ game:onplayerdamage(function(_self, inflictor, attacker, damage, dflags, mod, we
         damage = 999
     elseif mod == "MOD_UNKNOWN" and weapon == "none" then
         damage = 0
-    elseif mod == "MOD_FALLING" and weapon == "none" then
+    elseif mod == "MOD_FALLING" then
         damage = 0
     end
 
-    if attacker:_isbot() then
-        damage = 1
+    if _is_player(attacker) then
+        if attacker:_isbot() then
+            damage = 1
+        end
     end
 
     return damage

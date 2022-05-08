@@ -1,4 +1,4 @@
--- iw6x/s1x compatibility utils
+-- iw6x/s1x/h1 compatibility utils
 function gamename()
     if (gamename_) then
         return gamename_
@@ -85,6 +85,23 @@ function entity:_isbot()
         return true
     end
     return false
+end
+
+function _is_player(entity)
+    -- a non-valid entity in the context of damage callbacks are empty tables
+    if type(entity) == "table" then
+        return false
+    end
+    -- use actual game function to double check
+    if not game:isplayer(entity) then
+        return false
+    end
+
+    return true
+end
+
+function is_unsetup()
+    return tonumber(game:getdvar("unsetup")) == 1
 end
 
 -- iw6x give killstreak func
