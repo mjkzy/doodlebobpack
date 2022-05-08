@@ -1,8 +1,23 @@
+--[[
+
+dear programmer:
+when I rewrote this code, only god and I knew how it worked. now, only god knows it!
+
+therefore, if you are trying to optimize this mod and 
+it fails (most likely will break in some place), please increase the variable below to
+warn any future people that are interested in touching this mod.
+
+]]--
+
+total_hours_wasted_touching_this_mod = 3
+
 include("utils")
 if (not gamename()) then
     print("Unsupported game for bronxpack")
     return
 end
+
+print("This mod has been rewrote to complete shininess for " .. total_hours_wasted_touching_this_mod .. " hours.")
 
 include("config")
 
