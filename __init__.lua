@@ -36,7 +36,7 @@ function entity:player_spawned()
         return
     end
 
-    self:_iprintln("welcome to the Bronx Pack by ^:@plugwalker47")
+    self:_iprintln("welcome to the Bronx Pack")
     self:_iprintln("rewritten and maintained by ^:@mjkzys")
     self:_iprintln("use [{+stance}] and [{+melee_zoom}] to Refill Ammo")
     self:_iprintln("use [{+stance}] and [{+actionslot 1}] to Get Streaks")
