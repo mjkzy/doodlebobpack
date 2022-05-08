@@ -13,7 +13,7 @@ total_hours_wasted_touching_this_mod = 3
 
 include("utils")
 if (not gamename()) then
-    print("Unsupported game for bronxpack")
+    print("Unsupported game for doodlebobpack")
     return
 end
 
@@ -51,12 +51,13 @@ function entity:player_spawned()
         return
     end
 
-    self:_iprintln("welcome to the Bronx Pack")
+    self:_iprintln("welcome to doodlebob pack")
     self:_iprintln("rewritten and maintained by ^:@mjkzys")
     self:_iprintln("use [{+stance}] and [{+melee_zoom}] to Refill Ammo")
     self:_iprintln("use [{+stance}] and [{+actionslot 1}] to Get Streaks")
 
     self:setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
+
     if self:ishost() then
         if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
             self:_iprintlnbold("your status is ^:host")
