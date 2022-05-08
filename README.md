@@ -1,4 +1,4 @@
-# bronx pack but good
+# doodlebob pack
 
 ## how to install
 literally just download this as a zip, extract to iw6x/scripts/ or s1x/scripts/. the same files should work on both games, however I haven't tested so just lmk. please hmu on discord (mikz#0001) if something doesn't work, i'm too lazy to test
