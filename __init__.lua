@@ -1,25 +1,12 @@
---[[
-
-dear programmer:
-when I rewrote this code, only god and I knew how it worked. now, only god knows it!
-
-therefore, if you are trying to optimize this mod and 
-it fails (most likely will break in some place), please increase the variable below to
-warn any future people that are interested in touching this mod.
-
-]]--
-
-total_hours_wasted_touching_this_mod = 3
-
 include("utils")
 if (not gamename()) then
-    print("Unsupported game for doodlebobpack")
+    print("Unsupported game for doodlebob pack")
     return
 end
 
-print("This mod has been rewrote to complete shininess for " .. total_hours_wasted_touching_this_mod .. " hours.")
-
 include("config")
+
+players = {}
 
 -- dvars
 game:setdvar("pm_bouncing", 1)
@@ -28,12 +15,14 @@ game:setdvar("g_playercollision", 0)
 game:setdvar("g_playerejection", 0)
 game:setdvar("perk_bulletpenetrationmultiplier", 40)
 game:setdvar("jump_enablefalldamage", 1)
+
 -- snd/sr
 game:setdvar("scr_sd_roundswitch", 0)
-game:setdvar("scr_sd_timelimit", select(2.5, 1.5))
+game:setdvar("scr_sd_timelimit", select(2.5, 1.5, 2.5))
 game:setdvar("scr_sd_planttime", 1)
+-- sr is found on h1, but idrk if its on the game lmfao
 game:setdvar("scr_sr_roundswitch", 0)
-game:setdvar("scr_sr_timelimit", select(2.5, 1.5))
+game:setdvar("scr_sr_timelimit", select(2.5, 1.5, 2.5))
 game:setdvar("scr_sr_planttime", 1)
 
 -- dvars (uninitialized)
@@ -41,24 +30,51 @@ game:setdvarifuninitialized("botx", "no")
 game:setdvarifuninitialized("boty", "no")
 game:setdvarifuninitialized("botz", "no")
 game:setdvarifuninitialized("savemap", "no")
-game:setdvarifuninitialized("unsetup", "1")
+game:setdvarifuninitialized("unsetup", 1)
 
 damap = game:getdvar("mapname")
 
 function entity:player_spawned()
-    if game:getdvar("g_gametype") ~= select("sr", "sd") then
-        self:_iprintlnbold("Please switch game mode to ^:" .. select("Search & Rescue", "Search & Destroy"))
+    if game:getdvar("g_gametype") ~= select("sr", "sd", "sd") then
+        self:_iprintlnbold("Please switch game mode to ^:" ..
+                               select("Search & Rescue", "Search & Destroy", "Search & Destroy"))
         return
     end
 
-    self:_iprintln("welcome to doodlebob pack")
-    self:_iprintln("rewritten and maintained by ^:@mjkzys")
-    self:_iprintln("use [{+stance}] and [{+melee_zoom}] to Refill Ammo")
-    self:_iprintln("use [{+stance}] and [{+actionslot 1}] to Get Streaks")
+    if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
+        if (gamename() ~= "h1") then
+            self:_iprintln("welcome to doodlebob pack")
+            self:_iprintln("rewritten and maintained by ^:@mjkzys")
+            self:_iprintln("use [{+stance}] and [{+melee_zoom}] to Refill Ammo")
+            self:_iprintln("use [{+stance}] and [{+actionslot 1}] to Get Streaks")
+            self:_iprintln("use [{+stance}] and [{+actionslot 3}] to Save Bot Position")
+        else
+            game:ontimeout(function()
+                self:_iprintln("rewritten and maintained by ^:@mjkzys")
+                game:ontimeout(function()
+                    self:_iprintln("use [{+stance}] and [{+melee_zoom}] to Refill Ammo")
+                    game:ontimeout(function()
+                        self:_iprintln("use [{+stance}] and [{+actionslot 1}] to Get Streaks")
+                        game:ontimeout(function()
+                            self:_iprintln("use [{+stance}] and [{+actionslot 3}] to Save Bot Position")
+                        end, 1000)
+                    end, 1000)
+                end, 1000)
+            end, 1000)
+            self:_iprintln("welcome to doodlebob pack")
+        end
+    end
 
-    self:setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
+    -- set match bonus
+    self:_setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
 
     if self:ishost() then
+        if tonumber(game:getdvar("unsetup")) ~= 1 then
+            self:freezecontrols(false)
+        end
+
+        self:setrank(select(59, 49, 55), select(host.iw6x_prestige, host.s1x_prestige, host.h1_prestige))
+
         if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
             self:_iprintlnbold("your status is ^:host")
         elseif gamename() == "iw6x" and game:getteamscore("axis") == 3 and game:getteamscore("allies") == 3 then
@@ -74,22 +90,29 @@ function entity:player_spawned()
         self:notifyonplayercommand("savebind", "+actionslot 3")
         self:onnotify("savebind", function()
             if self:getstance() == "crouch" then
-                local forward = player:gettagorigin("j_head")
+                -- set position at crosshair
+                local forward = self:gettagorigin("j_head")
                 local endvec = game:anglestoforward(self:getplayerangles())
                 local endd = endvec:scale(1000000)
                 local cross = game:bullettrace(forward, endd, 0, self)["position"]
-                game:executecommand("botx " .. cross.x)
-                game:executecommand("boty " .. cross.y)
-                game:executecommand("botz " .. cross.z)
-                game:executecommand("savemap " .. damap)
+                game:setdvar("botx", cross.x)
+                game:setdvar("boty", cross.y)
+                game:setdvar("botz", cross.z)
                 game:setdvar("savemap", game:getdvar("mapname"))
-                self:_iprintln("bot spawn ^:saved^7, will apply next round")
+                self:_iprintln("next bot spawn ^:saved^7, teleporting bot(s)..")
+
+                -- teleport all current bots to crosshair
+                for index, p in ipairs(players) do
+                    if p:_isbot() then
+                        p:setorigin(cross)
+                    end
+                end
             elseif self:getstance() == "prone" then
-                if (game:getdvar("wtfx") ~= "no") then
-                    game:setdvar("wtfx", "no")
-                    game:setdvar("wtfy", "no")
-                    game:setdvar("wtfz", "no")
-                    self:_iprintln("bot spawn ^:cleared^7, will apply next round")
+                if (game:getdvar("botx") ~= "no") then
+                    game:setdvar("botx", "no")
+                    game:setdvar("boty", "no")
+                    game:setdvar("botz", "no")
+                    self:_iprintln("next bot spawn ^:cleared^7")
                 end
             end
         end)
@@ -102,6 +125,7 @@ function entity:player_spawned()
                 self:givemaxammo(self:getoffhandsecondaryclass())
             end
         end)
+
         self:notifyonplayercommand("streakbind", "+actionslot 1")
         self:onnotify("streakbind", function()
             -- different usage for iw6/s1
@@ -122,18 +146,17 @@ function entity:player_spawned()
                     self:giveweapon("turretheadenergy_mp")
                     self:switchtoweapon("turretheadenergy_mp")
                 end
+            end, function()
+                self:_iprintlnbold("not supported yet")
             end)
         end)
-
-        self:freezecontrols(false)
-        self:setrank(select(59, 49), hostprestige)
     else
         -- sort through guest table and check if we're a guest
         for i = 1, #guests do
             local guest = guests[i]
 
             if (self.name == guest.name) then
-                self:setrank(select(59, 49), select(guest.iw6x_prestige, guest.s1x_prestige))
+                self:setrank(select(59, 49, 55), select(guest.iw6x_prestige, guest.s1x_prestige, guest.h1_prestige))
 
                 if game:getteamscore("axis") == 0 and game:getteamscore("allies") == 0 then
                     self:_iprintlnbold("your status is ^:verified")
@@ -144,21 +167,29 @@ function entity:player_spawned()
         end
     end
 
-    if game:isbot(self) then
-        game:oninterval(function()
-            self:freezecontrols(true)
-        end, 5)
+    -- code to run if the player is a bot
+    if self:_isbot() then
+        -- freeze bot if unsetup
+        if tonumber(game:getdvar("unsetup")) ~= 1 then
+            game:oninterval(function()
+                self:freezecontrols(true)
+            end, 5)
+        end
 
+        -- some calling card thing
         select_func(function()
             self.playercardpatch = 121
-        end, nil)
-        self:setrank(select(59, 49), 0)
-        if (game:getdvar("savemap") == game:getdvar("mapname") and game:getdvar("botz") ~= "no") then
-            local manx = tonumber(game:getdvar("botx"))
-            local many = tonumber(game:getdvar("boty"))
-            local manz = tonumber(game:getdvar("botz"))
-            local savep = vector:new(manx, many, manz)
-            self:setorigin(savep)
+        end, nil, nil)
+
+        -- max rank but no prestige
+        self:setrank(select(59, 49, 55), host.bot_prestige)
+
+        -- teleport bot to saved spawn if existing
+        if (tonumber(game:getdvar("unsetup")) ~= 1 and game:getdvar("savemap") == game:getdvar("mapname") and
+            game:getdvar("botz") ~= "no") then
+            local position = vector:new(tonumber(game:getdvar("botx")), tonumber(game:getdvar("boty")),
+                tonumber(game:getdvar("botz")))
+            self:setorigin(position)
         end
     end
 end
@@ -172,12 +203,21 @@ end
 
 -- connected/player spawned listener
 level:onnotify("connected", function(player)
+    table.insert(players, player)
+
+    -- spawn listener & disconnect listener
     player:onnotifyonce("spawned_player", function()
         player:player_spawned()
     end)
+    player:onnotifyonce("disconnect", function()
+        for i, p in ipairs(players) do
+            if p == player then
+                table.remove(players, i)
+                break
+            end
+        end
+    end)
 end)
-
-level:onnotify("player_spawned", setup)
 
 -- damage override
 game:onplayerdamage(function(_self, inflictor, attacker, damage, dflags, mod, weapon, point, dir, hitloc)
@@ -191,8 +231,10 @@ game:onplayerdamage(function(_self, inflictor, attacker, damage, dflags, mod, we
     elseif mod == "MOD_FALLING" and weapon == "none" then
         damage = 0
     end
-    if attacker.team == "axis" then
+
+    if attacker:_isbot() then
         damage = 1
     end
+
     return damage
 end)
