@@ -11,7 +11,7 @@ function gamename()
         gamename_ = "iw6x"
     elseif (version:match("S1x")) then
         gamename_ = "s1x"
-    elseif (version:match("H1")) then -- only supports the old version using h1-mod
+    elseif (version:match("H1 MP 1.15")) then
         gamename_ = "h1"
     end
 
@@ -65,17 +65,6 @@ function entity:_iprintlnbold(string)
     end)
 end
 
-function entity:_setclientomnvar(var, val)
-    select_func(function()
-        self:setclientomnvar(var, val)
-    end, function()
-        self:setclientomnvar(var, val)
-    end, function()
-        -- not named properly on h1-mod but this is "setclientomnvar" (_meth_82F8)
-        self:stoplocalsound(var, val)
-    end)
-end
-
 local function starts_with(str, start)
     return str:sub(1, #start) == start
 end
@@ -87,15 +76,12 @@ function entity:_isbot()
     return false
 end
 
-function _is_player(entity)
+function _isplayer(entity)
     -- a non-valid entity in the context of damage callbacks are empty tables
-    if type(entity) == "table" then
-        return false
-    end
+    if type(entity) == "table" then return false end
+
     -- use actual game function to double check
-    if not game:isplayer(entity) then
-        return false
-    end
+    if not game:isplayer(entity) then return false end
 
     return true
 end

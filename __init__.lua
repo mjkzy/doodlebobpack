@@ -66,7 +66,7 @@ function entity:player_spawned()
     end
 
     -- set match bonus
-    self:_setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
+    self:setclientomnvar("ui_round_end_match_bonus", math.random(300, 1800))
 
     if self:ishost() then
         if not is_unsetup() then
@@ -233,7 +233,7 @@ game:onplayerdamage(function(_self, inflictor, attacker, damage, dflags, mod, we
         damage = 0
     end
 
-    if _is_player(attacker) then
+    if _isplayer(attacker) then
         if attacker:_isbot() then
             damage = 1
         end
